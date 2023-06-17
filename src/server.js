@@ -3,13 +3,8 @@ const multer = require("multer");
 const cors = require("cors");
 const mysql = require("mysql");
 const bodyParser = require("body-parser");
-const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  port: "3309",
-  password: "",
-  database: "vuedb",
-});
+const DB_CONFIG = require("./config/config.js");
+const connection = mysql.createConnection(DB_CONFIG);
 
 connection.connect((err) => {
   if (err) {
@@ -75,47 +70,21 @@ app.post("/upload", upload.array("upload"), (req, res) => {
       });
     });
   });
-  console.log("res------------------------------", values[0][0]);
+  // console.log("res------------------------------", values[0][0]);
 });
 
-// app.post("/device", (req, res) => {
-//   // console.log(req);
-//   // console.log(req.body);
-
-//   const { device_name, description, device_id } = req.body;
-//   const sql = `INSERT INTO device_info(name, description, device_id) VALUES(?, ?, ?)`;
-
-//   if (req.body.device_name == undefined || req.body.device_name == "") {
-//     res.send("Sorry, Plz name");
-//     return;
-//   }
-//   connection.query(
-//     sql,
-//     [device_name, description, device_id],
-//     (err, result) => {
-//       if (err) {
-//         console.log(err);
-//         return;
-//       }
-
-//       console.log("1 record inserted");
-//       res.send("Device added successfully!");
-//     }
-//   );
-// });
-
-// app.get("/", (req, res) => {
-//   res.send("Hello World");
-// });
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
 
 app.get("/get_data", async (req, res) => {
   try {
     const [d_map, devices] = await Promise.all([getMap(), getAllDevice()]);
-
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.json({ d_map, devices });
   } catch (error) {
-    throw error;
     console.log(error);
+    throw error;
     res.status(500).send("Error retrieving data from database");
   }
 });
@@ -152,5 +121,6 @@ function getAllDevice() {
 }
 
 app.listen(3000, () => {
+  console.log(DB_CONFIG);
   console.log("Server started on port 3000");
 });
